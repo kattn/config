@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Abort on any error
+set -euo pipefail
+
+# File that holds the commit message
+msgfile="$1"
+
+# Determine current branch name (works during rebase as well)
+branch=""
+if [[ -d .git/rebase-merge ]] && [[ -f .git/rebase-merge/head-name ]]; then
+  branch=$(sed 's|refs/heads/||' .git/rebase-merge/head-name)
+else
+  # Fallback to symbolic-ref; if detached HEAD, this may fail
+  branch=$(git symbolic-ref --short -q HEAD || true)
+fi
+
+# If we couldn't determine a branch (e.g., detached HEAD), do nothing
+if [[ -z "${branch}" || "${branch}" == "HEAD" ]]; then
+  exit 0
+fi
+
+# Skip adding prefix on main/master
+if [[ "${branch}" == "main" || "${branch}" == "master" ]]; then
+  exit 0
+fi
+
+# Read the first line of the commit message
+firstline=$(sed -n '1p' "$msgfile")
+
+# Skip merge commits (Git generates a default message starting with "Merge ")
+if [[ "$firstline" == Merge* ]]; then
+  exit 0
+fi
+
+required_prefix="${branch}: "
+
+# If already correctly prefixed, we're done
+if [[ "$firstline" == "$required_prefix"* ]]; then
+  exit 0
+fi
+
+# If it starts with the branch but with another separator, normalize to ": "
+if [[ "$firstline" == "${branch} "* ]] || [[ "$firstline" == "${branch} - "* ]] || [[ "$firstline" == "${branch}-"* ]]; then
+  # Remove the branch and any separators following it, then re-add normalized prefix
+  remainder=${firstline#${branch}}
+  remainder=${remainder#[: -]}
+  # Trim a single leading space, colon, or dash if present
+  remainder=${remainder# }
+  remainder=${remainder#: }
+  remainder=${remainder#- }
+  new_firstline="${required_prefix}${remainder}"
+else
+  # Prepend the required prefix
+  new_firstline="${required_prefix}${firstline}"
+fi
+
+# Reconstruct the message file with the new first line
+# Preserve the rest of the content as-is
+rest=$(tail -n +2 "$msgfile" || true)
+{
+  printf "%s\n" "$new_firstline"
+  # Only print rest if there is any
+  if [[ -n "${rest}" ]]; then
+    printf "%s\n" "$rest"
+  fi
+} > "$msgfile"
+
+# OK
+exit 0
