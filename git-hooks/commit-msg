@@ -1,11 +1,10 @@
-#!/usr/bin/env bash
-# Abort on any error
+#!/bin/bash
 set -euo pipefail
 
-# File that holds the commit message
-msgfile="$1"
+messagePrefix='^(feat|fix|docs|refactor|chore|test): '
 
-# Determine current branch name (works during rebase as well)
+messageFile="$1"
+
 branch=""
 if [[ -d .git/rebase-merge ]] && [[ -f .git/rebase-merge/head-name ]]; then
   branch=$(sed 's|refs/heads/||' .git/rebase-merge/head-name)
@@ -19,30 +18,33 @@ if [[ -z "${branch}" || "${branch}" == "HEAD" ]]; then
   exit 0
 fi
 
-# Skip adding prefix on main/master
-if [[ "${branch}" == "main" || "${branch}" == "master" ]]; then
+read -r firstLine < "$messageFile"
+
+if [[ $branch == "main" || $branch == "master" ]]; then
+  if ! [[ $firstLine =~ $messagePrefix ]]; then
+    echo "Error in commit-msg-hook: Invalid commit prefix, must match regex '$messagePrefix'"
+    echo $firstLine
+    exit 1
+  fi
   exit 0
 fi
 
-# Read the first line of the commit message
-firstline=$(sed -n '1p' "$msgfile")
-
 # Skip merge commits (Git generates a default message starting with "Merge ")
-if [[ "$firstline" == Merge* ]]; then
+if [[ "$firstLine" == Merge* ]]; then
   exit 0
 fi
 
 required_prefix="${branch}: "
 
 # If already correctly prefixed, we're done
-if [[ "$firstline" == "$required_prefix"* ]]; then
+if [[ "$firstLine" == "$required_prefix"* ]]; then
   exit 0
 fi
 
 # If it starts with the branch but with another separator, normalize to ": "
-if [[ "$firstline" == "${branch} "* ]] || [[ "$firstline" == "${branch} - "* ]] || [[ "$firstline" == "${branch}-"* ]]; then
+if [[ "$firstLine" == "${branch} "* ]] || [[ "$firstLine" == "${branch} - "* ]] || [[ "$firstLine" == "${branch}-"* ]]; then
   # Remove the branch and any separators following it, then re-add normalized prefix
-  remainder=${firstline#${branch}}
+  remainder=${firstLine#${branch}}
   remainder=${remainder#[: -]}
   # Trim a single leading space, colon, or dash if present
   remainder=${remainder# }
@@ -51,19 +53,19 @@ if [[ "$firstline" == "${branch} "* ]] || [[ "$firstline" == "${branch} - "* ]] 
   new_firstline="${required_prefix}${remainder}"
 else
   # Prepend the required prefix
-  new_firstline="${required_prefix}${firstline}"
+  new_firstline="${required_prefix}${firstLine}"
 fi
 
 # Reconstruct the message file with the new first line
 # Preserve the rest of the content as-is
-rest=$(tail -n +2 "$msgfile" || true)
+rest=$(tail -n +2 "$messageFile" || true)
 {
   printf "%s\n" "$new_firstline"
   # Only print rest if there is any
   if [[ -n "${rest}" ]]; then
     printf "%s\n" "$rest"
   fi
-} > "$msgfile"
+} > "$messageFile"
 
 # OK
 exit 0
