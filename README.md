@@ -6,7 +6,7 @@ Bunch of config files for how I like my setup. Setup for ease of transportation.
 
 To setup run
 
-`git --global config core.hooksPath <absolute-path-to-this-repo>/git-hooks`
+`git config --global core.hooksPath <absolute-path-to-this-repo>/git-hooks`
 
 To run single command without hooks
 
