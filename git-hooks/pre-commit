@@ -2,7 +2,7 @@
 
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
-BRANCH_REGEX='^(feature|bugfix|hotfix|docs|refactor|chore|test)\/[a-z0-9-]+$'
+BRANCH_REGEX='^(feat|fix|docs|refactor|chore|test)\/[a-z0-9-]+$'
 if [[ -d ".git/rebase-merge" ]]; then
   BRANCH_NAME=$(sed 's|refs/heads/||' .git/rebase-merge/head-name)
 fi
