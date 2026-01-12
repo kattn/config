@@ -14,6 +14,6 @@ To run single command without hooks
 
 ## PowerShell
 
-Add `. "<absolute-path-to-this-repo>\powershell\shared-profile.ps1"` to the end of your profile. 
-
-To edit profile run `notepad $profile`
+Run the script `powershell\setup.ps1` from root of this repo.
+The script creates(if its missing) and adds `. "<absolute-path-to-this-repo>\powershell\shared-profile.ps1"` to the end of your profile.
+To view and edit profile run `notepad $profile`.
