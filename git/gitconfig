@@ -1,0 +1,6 @@
+[alias]
+    tree = log --graph --oneline --decorate --all
+    co = checkout
+    br = branch
+    ci = commit
+    st = status

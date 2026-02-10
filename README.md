@@ -2,11 +2,11 @@
 
 Bunch of config files for how I like my setup. Setup for ease of transportation.
 
-## Git hooks
+## Git
 
-To setup run
-
-`git config --global core.hooksPath <absolute-path-to-this-repo>/git-hooks`
+To setup run:
+- Config: `git config --global include.path <absolute-path-to-this-repo>/git/gitconfig`
+- Hooks: `git config --global core.hooksPath <absolute-path-to-this-repo>/git/git-hooks`
 
 To run single command without hooks
 

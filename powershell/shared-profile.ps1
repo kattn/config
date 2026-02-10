@@ -1,6 +1,17 @@
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 
-#Python
+# Git
+
+# removes merged branches except main, current and master.
+function gb-clean {
+    git branch --merged |
+    ForEach-Object { $_.trim() } |
+    Where-Object { $_ -notmatch "^\*" } |
+    Where-Object { $_ -notmatch 'main' -and $_ -notmatch 'master'} |
+    ForEach-Object { git branch -d $_ }
+}
+
+# Python
 
 # venv: activate the python virtual environment located at .venv in the current directory
 # Usage: `venv` (activates ./.venv)

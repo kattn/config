@@ -1,1 +1,2 @@
 alias ls='ls -al'
+alias gb-clean="git branch --merged | grep -vE '(^\\*|main|master)' | xargs -n 1 git branch -d"
