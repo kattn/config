@@ -20,17 +20,17 @@ fi
 
 read -r firstLine < "$messageFile"
 
+# Skip merge commits (Git generates a default message starting with "Merge ")
+if [[ "$firstLine" == Merge* ]]; then
+  exit 0
+fi
+
 if [[ $branch == "main" || $branch == "master" ]]; then
   if ! [[ $firstLine =~ $messagePrefix ]]; then
     echo "Error in commit-msg-hook: Invalid commit prefix, must match regex '$messagePrefix'"
     echo $firstLine
     exit 1
   fi
-  exit 0
-fi
-
-# Skip merge commits (Git generates a default message starting with "Merge ")
-if [[ "$firstLine" == Merge* ]]; then
   exit 0
 fi
 
