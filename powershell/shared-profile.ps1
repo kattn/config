@@ -1,5 +1,24 @@
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 
+# Navigation aliases (bash-style)
+function ll  { Get-ChildItem -Force $args }
+function la  { Get-ChildItem -Force $args }
+Set-Alias -Name .. -Value _dotdot -Option AllScope
+function _dotdot  { Set-Location .. }
+Set-Alias -Name ... -Value _dotdotdot -Option AllScope
+function _dotdotdot { Set-Location ../.. }
+
+# Folder shortcuts
+function dev    { Set-Location "C:\dev" }
+function repos  { Set-Location "C:\dev\repos" }
+function para   { code "C:\dev\PARA" }
+
+# Claude projects
+function claude-p {
+    Set-Location "C:\dev\projects\claude-pg"
+    claude
+}
+
 # Git
 
 # removes merged branches except main, current and master.
